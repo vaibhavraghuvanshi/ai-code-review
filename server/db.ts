@@ -1,15 +1,13 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+// Mock database module
 import * as schema from "@shared/schema";
 
-neonConfig.webSocketConstructor = ws;
+// This is a mock implementation that doesn't require a real database
+console.log("Using mock database implementation");
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
-}
-
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle({ client: pool, schema });
+// Export a mock db object that can be imported but won't be used
+export const db = {
+  // Add mock methods if needed
+  query: async () => {
+    return { rows: [] };
+  }
+};
