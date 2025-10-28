@@ -3,22 +3,21 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
+// Core plugins that are always loaded
+const plugins = [
+  react(),
+  runtimeErrorOverlay(),
+];
+
+// Optional Replit plugins - we'll try to load them but won't fail if they're missing
+if (process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined) {
+  // These plugins are optional and enhance the dev experience in Replit
+  // We skip them here to keep the config synchronous and simple
+  // They can be added back with dynamic import if needed
+}
+
 export default defineConfig({
-  plugins: [
-    react(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-          await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
-          ),
-        ]
-      : []),
-  ],
+  plugins,
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),

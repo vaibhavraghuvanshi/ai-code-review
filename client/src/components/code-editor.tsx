@@ -8,12 +8,9 @@ import { Badge } from "./ui/badge";
 
 const languages = [
   { value: "javascript", label: "JavaScript" },
-  { value: "python", label: "Python" },
   { value: "typescript", label: "TypeScript" },
   { value: "react", label: "React" },
-  { value: "c", label: "C" },
-  { value: "cpp", label: "C++" },
-  { value: "php", label: "PHP" },
+
 ];
 
 export function CodeEditor() {
