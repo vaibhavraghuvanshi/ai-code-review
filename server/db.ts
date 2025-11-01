@@ -1,5 +1,6 @@
 // Mock database module
 import * as schema from "@shared/schema";
+import dotenv from "dotenv";
 
 // This is a mock implementation that doesn't require a real database
 console.log("Using mock database implementation");
