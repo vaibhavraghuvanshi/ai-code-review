@@ -13,6 +13,7 @@ import { Switch } from "./ui/switch";
 export type ManageSubscriptionProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onChanged?: () => void; // notify parent to refresh profile data
 };
 
 type Plan = {
@@ -37,7 +38,7 @@ type Subscription = {
   isAutoRenew?: boolean | null;
 };
 
-export function ManageSubscription({ open, onOpenChange }: ManageSubscriptionProps) {
+export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubscriptionProps) {
   const [userId, setUserId] = useState<string | null>(null);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [subs, setSubs] = useState<Subscription[]>([]);
@@ -146,6 +147,9 @@ export function ManageSubscription({ open, onOpenChange }: ManageSubscriptionPro
       } catch {
         // ignore
       }
+      // Inform parent and close dialog
+      try { onChanged && onChanged(); } catch {}
+      onOpenChange(false);
     } catch (err: any) {
       toast({ title: "Update failed", description: err?.message ?? "Server error", variant: "destructive" });
     } finally {
@@ -186,6 +190,9 @@ export function ManageSubscription({ open, onOpenChange }: ManageSubscriptionPro
       const updated = await res.json();
       setSubs((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
       toast({ title: "Canceled", description: "Subscription canceled" });
+      try { onChanged && onChanged(); } catch {}
+      // Optional: Close after cancel as well
+      onOpenChange(false);
     } catch (err: any) {
       toast({ title: "Cancel failed", description: err?.message ?? "Server error", variant: "destructive" });
     } finally {

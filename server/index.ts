@@ -1,11 +1,13 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
+import { runMigrations } from "./migrate";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";  // 👈 import storage (Drizzle DB wrapper)
 
 const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Allow larger payloads for AI code review (default is ~100kb)
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: false, limit: "1mb" }));
 
 // Request/response logging middleware
 app.use((req, res, next) => {
@@ -57,6 +59,22 @@ app.post("/api/users", async (req, res, next) => {
 });
 
 (async () => {
+  // Optional: run migrations at startup when explicitly enabled
+  if (process.env.RUN_MIGRATIONS_ON_START === "true") {
+    try {
+      const res = await runMigrations();
+      if (!res.skipped) {
+        log(`migrations applied: ${res.applied.length}`);
+      }
+    } catch (err) {
+      log(`migration error: ${(err as any)?.message || err}`);
+      // In dev it's helpful to fail fast
+      if (app.get("env") === "development") {
+        process.exit(1);
+      }
+    }
+  }
+
   const server = await registerRoutes(app);
 
   // Global error handler

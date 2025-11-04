@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -13,72 +13,42 @@ import {
 } from "./ui/table";
 import { useLocation } from "wouter";
 
-const mockReviews = [
-  {
-    id: "REV-001",
-    repository: "ai-code-analyzer",
-    branch: "main",
-    reviewer: "AI Reviewer",
-    date: "2024-07-20",
-    status: "Approved",
-    language: "JavaScript",
-  },
-  {
-    id: "REV-002",
-    repository: "user-dashboard-v2",
-    branch: "feature/auth-flow",
-    reviewer: "John Doe",
-    date: "2024-07-19",
-    status: "Pending",
-    language: "TypeScript",
-  },
-  {
-    id: "REV-003",
-    repository: "api-gateway",
-    branch: "hotfix/ssl-cert",
-    reviewer: "AI Reviewer",
-    date: "2024-07-18",
-    status: "Rejected",
-    language: "Python",
-  },
-  {
-    id: "REV-004",
-    repository: "frontend-components",
-    branch: "dev/shadcn-upgrade",
-    reviewer: "Jane Smith",
-    date: "2024-07-17",
-    status: "Approved",
-    language: "React",
-  },
-  {
-    id: "REV-005",
-    repository: "backend-microservice",
-    branch: "refactor/logging",
-    reviewer: "AI Reviewer",
-    date: "2024-07-16",
-    status: "Approved",
-    language: "C++",
-  },
-];
-
 export function ReviewTable() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
+  const [rows, setRows] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const filteredReviews = mockReviews.filter(
-    (review) =>
-      review.repository.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.branch.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      review.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("/api/reviews");
+        if (!res.ok) throw new Error("Failed to fetch reviews");
+        const data = await res.json();
+        if (mounted) setRows(Array.isArray(data) ? data : []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const filteredReviews = rows.filter((r) => {
+    const hay = `${r.id} ${r.language || ""} ${r.model || ""} ${r.status || ""}`.toLowerCase();
+    return hay.includes(searchTerm.toLowerCase());
+  });
 
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case "Approved":
+      case "completed":
         return "default";
-      case "Pending":
+      case "pending":
         return "secondary";
-      case "Rejected":
+      case "failed":
         return "destructive";
       default:
         return "outline";
@@ -109,23 +79,31 @@ export function ReviewTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Review ID</TableHead>
-              <TableHead>Repository</TableHead>
-              <TableHead>Branch</TableHead>
-              <TableHead>Reviewer</TableHead>
-              <TableHead>Date</TableHead>
+              <TableHead>ID</TableHead>
+              <TableHead>Language</TableHead>
+              <TableHead>Model</TableHead>
+              <TableHead>Tokens</TableHead>
+              <TableHead>Cost</TableHead>
+              <TableHead>Created</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredReviews.map((review) => (
+            {loading && (
+              <TableRow><TableCell colSpan={8}>Loading…</TableCell></TableRow>
+            )}
+            {!loading && filteredReviews.length === 0 && (
+              <TableRow><TableCell colSpan={8}>No reviews yet.</TableCell></TableRow>
+            )}
+            {!loading && filteredReviews.map((review) => (
               <TableRow key={review.id} data-testid={`row-review-${review.id}`}>
                 <TableCell className="font-mono text-sm">{review.id}</TableCell>
-                <TableCell>{review.repository}</TableCell>
-                <TableCell className="font-mono text-sm">{review.branch}</TableCell>
-                <TableCell>{review.reviewer}</TableCell>
-                <TableCell>{review.date}</TableCell>
+                <TableCell>{review.language}</TableCell>
+                <TableCell className="font-mono text-xs">{review.model ?? "-"}</TableCell>
+                <TableCell className="font-mono text-xs">{review.tokens ?? "-"}</TableCell>
+                <TableCell className="font-mono text-xs">{review.cost ?? "-"}</TableCell>
+                <TableCell className="font-mono text-xs">{review.createdAt ? new Date(review.createdAt).toLocaleString() : "-"}</TableCell>
                 <TableCell>
                   <Badge variant={getStatusVariant(review.status)}>
                     {review.status}
@@ -136,6 +114,7 @@ export function ReviewTable() {
                     variant="ghost" 
                     size="sm" 
                     className="gap-2"
+                    onClick={() => setLocation(`/dashboard?reviewId=${review.id}`)}
                     data-testid={`button-view-${review.id}`}
                   >
                     <Eye className="h-4 w-4" />

@@ -19,6 +19,7 @@ export interface IStorage {
   getReviewById(id: number): Promise<Review | undefined>;
   getReviewsByUser(userId: string): Promise<Review[]>;
   getAllReviews(): Promise<Review[]>;
+  deleteReview(id: number): Promise<boolean>;
 
   
 }
@@ -58,6 +59,12 @@ export class DrizzleStorage implements IStorage {
 
   async getAllReviews(): Promise<Review[]> {
     return db.select().from(reviews);
+  }
+
+  async deleteReview(id: number): Promise<boolean> {
+    const result = await db.delete(reviews).where(eq(reviews.id, id));
+    // drizzle returns number of affected rows via .execute() on some drivers; fallback true
+    return true;
   }
 }
 

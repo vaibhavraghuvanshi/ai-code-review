@@ -167,11 +167,11 @@
 import { db } from "../db";
 import { eq, and, lt, or } from "drizzle-orm";
 import { subscriptions, plans } from "@shared/schema";
-import dayjs from "dayjs";
+import { addDays } from "date-fns";
 
 // Helper: append an audit entry to a subscription inside a tx or the root db
 async function appendAudit(
-  client: typeof db | Parameters<typeof db.transaction>[0],
+  client: any,
   subId: number,
   entry: { action: string; by?: string | null; changes?: Record<string, unknown> | null }
 ) {
@@ -185,9 +185,10 @@ async function appendAudit(
   const currentLog: any[] = Array.isArray(existing?.auditLog) ? (existing!.auditLog as any[]) : [];
   const next = [...currentLog, { action: entry.action, at: now.toISOString(), ...(entry.by ? { by: entry.by } : {}), ...(entry.changes ? { changes: entry.changes } : {}) }];
 
+  // Be lenient about updatedAt not existing in older DBs
   await client
     .update(subscriptions)
-    .set({ auditLog: next, updatedAt: now })
+    .set({ auditLog: next })
     .where(eq(subscriptions.id, subId));
 }
 
@@ -202,11 +203,9 @@ export async function createSubscription(data: {
   const trialDurationDays = 7;
 
   const now = new Date();
-  const endDate = dayjs(now)
-    .add(data.isTrial ? trialDurationDays : planDurationDays, "day")
-    .toDate();
+  const endDate = addDays(now, data.isTrial ? trialDurationDays : planDurationDays);
 
-  const trialEndsAt = data.isTrial ? dayjs(now).add(trialDurationDays, "day").toDate() : null;
+  const trialEndsAt = data.isTrial ? addDays(now, trialDurationDays) : null;
 
   return await db.transaction(async (tx) => {
     // Cancel existing active/trial subs to avoid overlaps
@@ -251,8 +250,6 @@ export async function createSubscription(data: {
         paymentMethod: data.paymentMethod ?? (data.isTrial ? "trial" : "free"),
         paymentStatus: data.isTrial ? "paid" : "paid",
         isAutoRenew: !data.isTrial,
-        createdAt: now,
-        updatedAt: now,
         auditLog: [],
       })
       .returning();
@@ -269,23 +266,20 @@ export async function createSubscription(data: {
 // 2) Renew subscriptions automatically (unchanged)
 export async function renewActiveSubscriptions() {
   const now = new Date();
+  const nextDay = addDays(now, 1);
   const expiringSoon = await db
     .select()
     .from(subscriptions)
-    .where(and(eq(subscriptions.status, "active"), lt(subscriptions.endDate, dayjs(now).add(1, "day").toDate())));
+    .where(and(eq(subscriptions.status, "active"), lt(subscriptions.endDate, nextDay)));
 
   for (const sub of expiringSoon) {
     if (!sub.isAutoRenew) {
       continue;
     }
-    const newEndDate = dayjs(sub.endDate ?? now).add(30, "day").toDate();
+  const newEndDate = addDays(sub.endDate ?? now, 30);
     const [updated] = await db
       .update(subscriptions)
-      .set({
-        endDate: newEndDate,
-        renewalDate: now,
-        updatedAt: now,
-      })
+      .set({ endDate: newEndDate, renewalDate: now })
       .where(eq(subscriptions.id, sub.id))
       .returning();
 
@@ -301,7 +295,7 @@ export async function expireOldSubscriptions() {
   const now = new Date();
   const expired = await db
     .update(subscriptions)
-    .set({ status: "expired", updatedAt: now })
+    .set({ status: "expired" })
     .where(and(eq(subscriptions.status, "active"), lt(subscriptions.endDate, now)))
     .returning();
 
@@ -317,7 +311,7 @@ export async function expireTrials() {
 
   const expiredTrials = await db
     .update(subscriptions)
-    .set({ status: "expired", updatedAt: now })
+    .set({ status: "expired" })
     .where(and(eq(subscriptions.status, "trial"), lt(subscriptions.trialEndsAt, now)))
     .returning();
 
@@ -341,7 +335,7 @@ export async function updateSubscriptionAutoRenew(id: number, isAutoRenew: boole
   const now = new Date();
   const [updated] = await db
     .update(subscriptions)
-    .set({ isAutoRenew, updatedAt: now })
+    .set({ isAutoRenew })
     .where(eq(subscriptions.id, id))
     .returning();
 
@@ -356,7 +350,7 @@ export async function cancelSubscription(id: number) {
   const now = new Date();
   const [updated] = await db
     .update(subscriptions)
-    .set({ status: "canceled", isAutoRenew: false, endDate: now, updatedAt: now })
+    .set({ status: "canceled", isAutoRenew: false, endDate: now })
     .where(eq(subscriptions.id, id))
     .returning();
 
@@ -368,8 +362,7 @@ export async function cancelSubscription(id: number) {
 
 // 8) Admin update: status/endDate with audit
 export async function adminUpdateSubscription(id: number, data: { status?: "active" | "canceled" | "expired" | "trial"; endDate?: Date | null }) {
-  const now = new Date();
-  const patch: Partial<Pick<typeof subscriptions.$inferInsert, "status" | "endDate" | "updatedAt">> = { updatedAt: now };
+  const patch: Partial<Pick<typeof subscriptions.$inferInsert, "status" | "endDate">> = {};
   if (typeof data.status === "string") patch.status = data.status;
   if (typeof data.endDate !== "undefined") patch.endDate = data.endDate;
 
