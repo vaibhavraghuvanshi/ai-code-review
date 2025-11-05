@@ -1,4 +1,4 @@
-import { CodeEditor } from "../code-editor";
+import { CodeEditor } from '../code-editor';
 
 export default function CodeEditorExample() {
   return (

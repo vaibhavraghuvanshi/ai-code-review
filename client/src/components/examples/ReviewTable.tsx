@@ -1,4 +1,4 @@
-import { ReviewTable } from "../review-table";
+import { ReviewTable } from '../review-table';
 
 export default function ReviewTableExample() {
   return (

@@ -1,5 +1,5 @@
-import { SettingsPanel } from "../settings-panel";
-import { ThemeProvider } from "../theme-provider";
+import { SettingsPanel } from '../settings-panel';
+import { ThemeProvider } from '../theme-provider';
 
 export default function SettingsPanelExample() {
   return (

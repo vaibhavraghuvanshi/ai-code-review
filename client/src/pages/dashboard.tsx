@@ -1,6 +1,6 @@
-import { CodeEditor } from "@/components/code-editor";
-import { DashboardStats } from "@/components/dashboard-stats";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CodeEditor } from '@/components/code-editor';
+import { DashboardStats } from '@/components/dashboard-stats';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Dashboard() {
   return (
@@ -14,8 +14,12 @@ export default function Dashboard() {
 
       <Tabs defaultValue="editor" className="w-full">
         <TabsList>
-          <TabsTrigger value="editor" data-testid="tab-editor">Code Editor</TabsTrigger>
-          <TabsTrigger value="stats" data-testid="tab-stats">Analytics</TabsTrigger>
+          <TabsTrigger value="editor" data-testid="tab-editor">
+            Code Editor
+          </TabsTrigger>
+          <TabsTrigger value="stats" data-testid="tab-stats">
+            Analytics
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="editor" className="mt-6">

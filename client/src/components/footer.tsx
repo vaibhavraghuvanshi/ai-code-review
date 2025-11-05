@@ -1,5 +1,5 @@
-import { SiX, SiLinkedin, SiGithub } from "react-icons/si";
-import { Link } from "wouter";
+import { SiX, SiLinkedin, SiGithub } from 'react-icons/si';
+import { Link } from 'wouter';
 
 export function Footer() {
   return (
@@ -17,17 +17,26 @@ export function Footer() {
             <h4 className="font-medium mb-4">Product</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/features" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  href="/features"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Features
                 </Link>
               </li>
               <li>
-                <Link href="/subscription-plans" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  href="/subscription-plans"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Pricing
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Documentation
                 </a>
               </li>
@@ -38,17 +47,26 @@ export function Footer() {
             <h4 className="font-medium mb-4">Company</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   About
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Blog
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Contact
                 </a>
               </li>
@@ -59,17 +77,26 @@ export function Footer() {
             <h4 className="font-medium mb-4">Legal</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Privacy
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Terms
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
                   Security
                 </a>
               </li>
@@ -82,22 +109,22 @@ export function Footer() {
             © 2025 AICodeReview. All rights reserved.
           </p>
           <div className="flex gap-4">
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="text-muted-foreground hover:text-foreground transition-colors"
               data-testid="link-twitter"
             >
               <SiX className="h-5 w-5" />
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="text-muted-foreground hover:text-foreground transition-colors"
               data-testid="link-linkedin"
             >
               <SiLinkedin className="h-5 w-5" />
             </a>
-            <a 
-              href="#" 
+            <a
+              href="#"
               className="text-muted-foreground hover:text-foreground transition-colors"
               data-testid="link-github"
             >

@@ -1,4 +1,4 @@
-import { SubscriptionPlans } from "../subscription-plans";
+import { SubscriptionPlans } from '../subscription-plans';
 
 export default function SubscriptionPlansExample() {
   return (

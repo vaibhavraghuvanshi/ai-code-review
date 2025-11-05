@@ -1,4 +1,4 @@
-import { SettingsPanel } from "@/components/settings-panel";
+import { SettingsPanel } from '@/components/settings-panel';
 
 export default function Settings() {
   return (

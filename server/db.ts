@@ -1,7 +1,7 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
-import * as schema from "@shared/schema";
-import dotenv from "dotenv";
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+import * as schema from '@shared/schema';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -15,16 +15,13 @@ export const db = drizzle(pool, { schema });
 (async () => {
   try {
     const client = await pool.connect();
-    await client.query("SELECT NOW()"); // simple test query
-    console.log("✅ Database connected successfully");
+    await client.query('SELECT NOW()'); // simple test query
+    console.log('✅ Database connected successfully');
     client.release();
   } catch (err) {
-    console.error("❌ Database connection failed:", err);
+    console.error('❌ Database connection failed:', err);
   }
 })();
-
-
-
 
 // import { Pool, neonConfig } from '@neondatabase/serverless';
 // import { drizzle } from 'drizzle-orm/neon-serverless';

@@ -1,0 +1,13 @@
+dist/
+node_modules/
+coverage/
+.next/
+.build/
+build/
+*.min.js
+*.bundle.js
+*.snap
+*.lock
+*.log
+**/*.d.ts
+attached_assets/

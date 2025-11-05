@@ -1,4 +1,4 @@
-import { LayoutDashboard, History, User, Settings, DollarSign, Sparkles } from "lucide-react";
+import { LayoutDashboard, History, User, Settings, DollarSign, Sparkles } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -9,33 +9,33 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
-} from "@/components/ui/sidebar";
-import { useLocation } from "wouter";
+} from '@/components/ui/sidebar';
+import { useLocation } from 'wouter';
 
 const menuItems = [
   {
-    title: "Dashboard",
-    url: "/dashboard",
+    title: 'Dashboard',
+    url: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    title: "Review History",
-    url: "/review-history",
+    title: 'Review History',
+    url: '/review-history',
     icon: History,
   },
   {
-    title: "Profile",
-    url: "/profile",
+    title: 'Profile',
+    url: '/profile',
     icon: User,
   },
   {
-    title: "Settings",
-    url: "/settings",
+    title: 'Settings',
+    url: '/settings',
     icon: Settings,
   },
   {
-    title: "Subscription Plans",
-    url: "/subscription-plans",
+    title: 'Subscription Plans',
+    url: '/subscription-plans',
     icon: DollarSign,
   },
 ];
@@ -58,8 +58,8 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild 
+                  <SidebarMenuButton
+                    asChild
                     isActive={location === item.url}
                     data-testid={`link-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                   >

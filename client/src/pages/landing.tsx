@@ -1,11 +1,11 @@
-import { HeroSection } from "@/components/hero-section";
-import { FeaturesSection } from "@/components/features-section";
-import { PricingPreview } from "@/components/pricing-preview";
-import { Footer } from "@/components/footer";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Link } from "wouter";
-import { Sparkles } from "lucide-react";
+import { HeroSection } from '@/components/hero-section';
+import { FeaturesSection } from '@/components/features-section';
+import { PricingPreview } from '@/components/pricing-preview';
+import { Footer } from '@/components/footer';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { Link } from 'wouter';
+import { Sparkles } from 'lucide-react';
 
 export default function Landing() {
   return (
@@ -22,7 +22,9 @@ export default function Landing() {
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <Link href="/auth">
-                <Button variant="ghost" data-testid="button-nav-login">Login</Button>
+                <Button variant="ghost" data-testid="button-nav-login">
+                  Login
+                </Button>
               </Link>
               <Link href="/auth">
                 <Button data-testid="button-nav-signup">Sign Up</Button>

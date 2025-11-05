@@ -1,4 +1,4 @@
-import { ProfileInfo } from "@/components/profile-info";
+import { ProfileInfo } from '@/components/profile-info';
 
 export default function Profile() {
   return (

@@ -1,0 +1,24 @@
+{
+  // Prefer Prettier for formatting and run ESLint fixes on save
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always",
+    "source.organizeImports": "always"
+  },
+  // Validate these languages with ESLint
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "json",
+    "yaml"
+  ],
+  // Keep Prettier and ESLint in sync
+  "prettier.enable": true,
+  "prettier.requireConfig": true,
+  // Formatting consistency
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true
+}

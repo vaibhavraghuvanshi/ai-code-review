@@ -1,28 +1,42 @@
-import { useState } from "react";
-import { Settings2, User, Bell, Palette, Shield, Plug, Check, X, Github, GitlabIcon as Gitlab, Key, Trash2, ExternalLink } from "lucide-react";
-import { SiGithub, SiGitlab } from "react-icons/si";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Switch } from "./ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Badge } from "./ui/badge";
-import { Separator } from "./ui/separator";
-import { useTheme } from "./theme-provider";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useState } from 'react';
+import {
+  Settings2,
+  User,
+  Bell,
+  Palette,
+  Shield,
+  Plug,
+  Check,
+  X,
+  Github,
+  GitlabIcon as Gitlab,
+  Key,
+  Trash2,
+  ExternalLink,
+} from 'lucide-react';
+import { SiGithub, SiGitlab } from 'react-icons/si';
+import { Button } from './ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Label } from './ui/label';
+import { Input } from './ui/input';
+import { Switch } from './ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Badge } from './ui/badge';
+import { Separator } from './ui/separator';
+import { useTheme } from './theme-provider';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 
 export function SettingsPanel() {
   const { theme, setTheme } = useTheme();
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
-  const [defaultLanguage, setDefaultLanguage] = useState("english");
-  
+  const [defaultLanguage, setDefaultLanguage] = useState('english');
+
   // Account settings
-  const [fullName, setFullName] = useState("John Doe");
-  const [email, setEmail] = useState("john.doe@example.com");
-  
+  const [fullName, setFullName] = useState('John Doe');
+  const [email, setEmail] = useState('john.doe@example.com');
+
   // Notification settings
   const [reviewComplete, setReviewComplete] = useState(true);
   const [securityAlerts, setSecurityAlerts] = useState(true);
@@ -30,40 +44,40 @@ export function SettingsPanel() {
   const [productUpdates, setProductUpdates] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
   const [pushNotifications, setPushNotifications] = useState(true);
-  
+
   // Appearance settings
-  const [fontSize, setFontSize] = useState("medium");
-  const [codeTheme, setCodeTheme] = useState("vs-dark");
+  const [fontSize, setFontSize] = useState('medium');
+  const [codeTheme, setCodeTheme] = useState('vs-dark');
   const [compactMode, setCompactMode] = useState(false);
-  
+
   // Integration settings
   const [githubConnected, setGithubConnected] = useState(true);
   const [gitlabConnected, setGitlabConnected] = useState(false);
-  
+
   // Security settings
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [apiKeys, setApiKeys] = useState([
-    { id: 1, name: "Production API Key", key: "sk_live_••••••••••••4h3j", created: "2024-01-15" },
-    { id: 2, name: "Development API Key", key: "sk_test_••••••••••••9k2p", created: "2024-02-20" },
+    { id: 1, name: 'Production API Key', key: 'sk_live_••••••••••••4h3j', created: '2024-01-15' },
+    { id: 2, name: 'Development API Key', key: 'sk_test_••••••••••••9k2p', created: '2024-02-20' },
   ]);
 
   const handleSaveChanges = () => {
-    console.log("Settings saved");
+    console.log('Settings saved');
   };
 
   const handleConnectGithub = () => {
     setGithubConnected(!githubConnected);
-    console.log("GitHub connection toggled");
+    console.log('GitHub connection toggled');
   };
 
   const handleConnectGitlab = () => {
     setGitlabConnected(!gitlabConnected);
-    console.log("GitLab connection toggled");
+    console.log('GitLab connection toggled');
   };
 
   const handleDeleteApiKey = (id: number) => {
-    setApiKeys(apiKeys.filter(key => key.id !== id));
-    console.log("API key deleted:", id);
+    setApiKeys(apiKeys.filter((key) => key.id !== id));
+    console.log('API key deleted:', id);
   };
 
   return (
@@ -107,24 +121,22 @@ export function SettingsPanel() {
           <Card>
             <CardHeader>
               <CardTitle>General Preferences</CardTitle>
-              <CardDescription>
-                Configure your basic application settings.
-              </CardDescription>
+              <CardDescription>Configure your basic application settings.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label>Application Theme</Label>
                 <div className="flex gap-4">
                   <Button
-                    variant={theme === "light" ? "default" : "outline"}
-                    onClick={() => setTheme("light")}
+                    variant={theme === 'light' ? 'default' : 'outline'}
+                    onClick={() => setTheme('light')}
                     data-testid="button-theme-light"
                   >
                     Light
                   </Button>
                   <Button
-                    variant={theme === "dark" ? "default" : "outline"}
-                    onClick={() => setTheme("dark")}
+                    variant={theme === 'dark' ? 'default' : 'outline'}
+                    onClick={() => setTheme('dark')}
                     data-testid="button-theme-dark"
                   >
                     Dark
@@ -138,7 +150,8 @@ export function SettingsPanel() {
                 <div className="space-y-0.5">
                   <Label>Email Notifications</Label>
                   <p className="text-sm text-muted-foreground">
-                    Receive email updates about your code reviews, new features, and important announcements.
+                    Receive email updates about your code reviews, new features, and important
+                    announcements.
                   </p>
                 </div>
                 <Switch
@@ -189,9 +202,7 @@ export function SettingsPanel() {
           <Card>
             <CardHeader>
               <CardTitle>Profile Information</CardTitle>
-              <CardDescription>
-                Update your account profile and personal details.
-              </CardDescription>
+              <CardDescription>Update your account profile and personal details.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-6">
@@ -238,9 +249,7 @@ export function SettingsPanel() {
           <Card>
             <CardHeader>
               <CardTitle>Password</CardTitle>
-              <CardDescription>
-                Change your password to keep your account secure.
-              </CardDescription>
+              <CardDescription>Change your password to keep your account secure.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -280,9 +289,7 @@ export function SettingsPanel() {
           <Card className="border-destructive">
             <CardHeader>
               <CardTitle className="text-destructive">Danger Zone</CardTitle>
-              <CardDescription>
-                Irreversible and destructive actions.
-              </CardDescription>
+              <CardDescription>Irreversible and destructive actions.</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
@@ -392,9 +399,7 @@ export function SettingsPanel() {
           <Card>
             <CardHeader>
               <CardTitle>Push Notifications</CardTitle>
-              <CardDescription>
-                Manage browser push notifications.
-              </CardDescription>
+              <CardDescription>Manage browser push notifications.</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
@@ -418,24 +423,22 @@ export function SettingsPanel() {
           <Card>
             <CardHeader>
               <CardTitle>Theme</CardTitle>
-              <CardDescription>
-                Customize the visual appearance of the application.
-              </CardDescription>
+              <CardDescription>Customize the visual appearance of the application.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label>Color Theme</Label>
                 <div className="flex gap-4">
                   <Button
-                    variant={theme === "light" ? "default" : "outline"}
-                    onClick={() => setTheme("light")}
+                    variant={theme === 'light' ? 'default' : 'outline'}
+                    onClick={() => setTheme('light')}
                     data-testid="button-appearance-light"
                   >
                     Light
                   </Button>
                   <Button
-                    variant={theme === "dark" ? "default" : "outline"}
-                    onClick={() => setTheme("dark")}
+                    variant={theme === 'dark' ? 'default' : 'outline'}
+                    onClick={() => setTheme('dark')}
                     data-testid="button-appearance-dark"
                   >
                     Dark
@@ -481,9 +484,7 @@ export function SettingsPanel() {
           <Card>
             <CardHeader>
               <CardTitle>Code Editor</CardTitle>
-              <CardDescription>
-                Customize your code editor experience.
-              </CardDescription>
+              <CardDescription>Customize your code editor experience.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -509,9 +510,7 @@ export function SettingsPanel() {
           <Card>
             <CardHeader>
               <CardTitle>Connected Services</CardTitle>
-              <CardDescription>
-                Manage your integrations with external platforms.
-              </CardDescription>
+              <CardDescription>Manage your integrations with external platforms.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -534,11 +533,11 @@ export function SettingsPanel() {
                     </Badge>
                   )}
                   <Button
-                    variant={githubConnected ? "outline" : "default"}
+                    variant={githubConnected ? 'outline' : 'default'}
                     onClick={handleConnectGithub}
                     data-testid="button-github-integration"
                   >
-                    {githubConnected ? "Disconnect" : "Connect"}
+                    {githubConnected ? 'Disconnect' : 'Connect'}
                   </Button>
                 </div>
               </div>
@@ -563,11 +562,11 @@ export function SettingsPanel() {
                     </Badge>
                   )}
                   <Button
-                    variant={gitlabConnected ? "outline" : "default"}
+                    variant={gitlabConnected ? 'outline' : 'default'}
                     onClick={handleConnectGitlab}
                     data-testid="button-gitlab-integration"
                   >
-                    {gitlabConnected ? "Disconnect" : "Connect"}
+                    {gitlabConnected ? 'Disconnect' : 'Connect'}
                   </Button>
                 </div>
               </div>
@@ -577,9 +576,7 @@ export function SettingsPanel() {
           <Card>
             <CardHeader>
               <CardTitle>CI/CD Integration</CardTitle>
-              <CardDescription>
-                Automate code reviews in your deployment pipeline.
-              </CardDescription>
+              <CardDescription>Automate code reviews in your deployment pipeline.</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
@@ -597,9 +594,7 @@ export function SettingsPanel() {
           <Card>
             <CardHeader>
               <CardTitle>Two-Factor Authentication</CardTitle>
-              <CardDescription>
-                Add an extra layer of security to your account.
-              </CardDescription>
+              <CardDescription>Add an extra layer of security to your account.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
@@ -617,9 +612,7 @@ export function SettingsPanel() {
               </div>
               {twoFactorEnabled && (
                 <div className="p-4 border rounded-lg bg-muted/30">
-                  <p className="text-sm mb-3">
-                    Scan this QR code with your authenticator app:
-                  </p>
+                  <p className="text-sm mb-3">Scan this QR code with your authenticator app:</p>
                   <div className="h-32 w-32 bg-card border rounded-md flex items-center justify-center">
                     <span className="text-xs text-muted-foreground">QR Code</span>
                   </div>
@@ -631,9 +624,7 @@ export function SettingsPanel() {
           <Card>
             <CardHeader>
               <CardTitle>API Keys</CardTitle>
-              <CardDescription>
-                Manage API keys for programmatic access.
-              </CardDescription>
+              <CardDescription>Manage API keys for programmatic access.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {apiKeys.map((apiKey) => (
@@ -670,9 +661,7 @@ export function SettingsPanel() {
           <Card>
             <CardHeader>
               <CardTitle>Active Sessions</CardTitle>
-              <CardDescription>
-                Monitor and manage your active login sessions.
-              </CardDescription>
+              <CardDescription>Monitor and manage your active login sessions.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -706,7 +695,9 @@ export function SettingsPanel() {
       </Tabs>
 
       <div className="flex justify-end gap-4">
-        <Button variant="outline" data-testid="button-cancel-settings">Cancel</Button>
+        <Button variant="outline" data-testid="button-cancel-settings">
+          Cancel
+        </Button>
         <Button onClick={handleSaveChanges} data-testid="button-save-settings">
           Save Changes
         </Button>

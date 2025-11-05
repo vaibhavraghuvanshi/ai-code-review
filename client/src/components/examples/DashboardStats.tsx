@@ -1,4 +1,4 @@
-import { DashboardStats } from "../dashboard-stats";
+import { DashboardStats } from '../dashboard-stats';
 
 export default function DashboardStatsExample() {
   return (

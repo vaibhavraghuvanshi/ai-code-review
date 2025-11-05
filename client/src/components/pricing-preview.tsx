@@ -1,52 +1,52 @@
-import { Check } from "lucide-react";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
-import { Link } from "wouter";
+import { Check } from 'lucide-react';
+import { Button } from './ui/button';
+import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
+import { Link } from 'wouter';
 
 const plans = [
   {
-    name: "Free",
-    price: "$0",
-    period: "/month",
+    name: 'Free',
+    price: '$0',
+    period: '/month',
     features: [
-      "Basic code analysis",
-      "Up to 5 reviews/month",
-      "Community support",
-      "Limited AI suggestions",
+      'Basic code analysis',
+      'Up to 5 reviews/month',
+      'Community support',
+      'Limited AI suggestions',
     ],
-    cta: "Current Plan",
-    variant: "secondary" as const,
+    cta: 'Current Plan',
+    variant: 'secondary' as const,
   },
   {
-    name: "Pro",
-    price: "$29",
-    period: "/month",
+    name: 'Pro',
+    price: '$29',
+    period: '/month',
     features: [
-      "Advanced code analysis",
-      "Unlimited reviews",
-      "Priority email support",
-      "Intelligent AI suggestions",
-      "CI/CD integration",
-      "Detailed reporting",
+      'Advanced code analysis',
+      'Unlimited reviews',
+      'Priority email support',
+      'Intelligent AI suggestions',
+      'CI/CD integration',
+      'Detailed reporting',
     ],
-    cta: "Upgrade to Pro",
-    variant: "default" as const,
+    cta: 'Upgrade to Pro',
+    variant: 'default' as const,
     featured: true,
   },
   {
-    name: "Enterprise",
-    price: "Custom",
-    period: "",
+    name: 'Enterprise',
+    price: 'Custom',
+    period: '',
     features: [
-      "All Pro features",
-      "Dedicated account manager",
-      "On-premise deployment",
-      "Custom AI models",
-      "Advanced security features",
-      "SLA agreements",
+      'All Pro features',
+      'Dedicated account manager',
+      'On-premise deployment',
+      'Custom AI models',
+      'Advanced security features',
+      'SLA agreements',
     ],
-    cta: "Contact Sales",
-    variant: "outline" as const,
+    cta: 'Contact Sales',
+    variant: 'outline' as const,
   },
 ];
 
@@ -55,9 +55,7 @@ export function PricingPreview() {
     <section className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/30">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Choose Your Perfect Plan
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Choose Your Perfect Plan</h2>
           <p className="text-muted-foreground text-lg">
             Find the right subscription tier for your code review needs.
           </p>
@@ -68,7 +66,7 @@ export function PricingPreview() {
             <Card
               key={index}
               className={`relative hover-elevate transition-all duration-200 ${
-                plan.featured ? "border-2 border-primary shadow-lg" : ""
+                plan.featured ? 'border-2 border-primary shadow-lg' : ''
               }`}
               data-testid={`card-plan-${plan.name.toLowerCase()}`}
             >
@@ -98,9 +96,9 @@ export function PricingPreview() {
               </CardContent>
               <CardFooter className="pt-6">
                 <Link href="/subscription-plans" className="w-full">
-                  <Button 
-                    variant={plan.variant} 
-                    className="w-full" 
+                  <Button
+                    variant={plan.variant}
+                    className="w-full"
                     data-testid={`button-${plan.name.toLowerCase()}-plan`}
                   >
                     {plan.cta}
