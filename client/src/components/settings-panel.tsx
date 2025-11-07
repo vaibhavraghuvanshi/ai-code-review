@@ -15,9 +15,11 @@ import { i18nTranslate } from '@/i18n';
 import { useTheme } from './theme-provider';
 import { usePreferences } from './preferences-provider';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { useToast } from '@/hooks/use-toast';
 
 export function SettingsPanel() {
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
   const {
     locale,
     setLocale,
@@ -64,6 +66,7 @@ export function SettingsPanel() {
 
   const handleSaveChanges = () => {
     console.log('Settings saved');
+    toast({ title: t('settingsSavedTitle'), description: t('settingsSavedDesc') });
   };
 
   const handleConnectGithub = () => {
