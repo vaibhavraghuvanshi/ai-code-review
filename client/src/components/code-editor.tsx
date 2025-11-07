@@ -938,10 +938,15 @@ export function CodeEditor() {
                           className="mt-2"
                           variant="default"
                           onClick={() => {
-                            if (fixedCode && fixedCode !== reviewBaseCode) {
-                              setCode(fixedCode);
-                              toast({ title: 'Applied', description: 'Fixed code moved into editor.' });
-                            }
+                            if (!fixedCode) return;
+                            const changed = fixedCode !== reviewBaseCode;
+                            setCode(fixedCode);
+                            toast({
+                              title: changed ? 'Applied' : 'No changes',
+                              description: changed
+                                ? 'Fixed code moved into editor.'
+                                : 'AI fixed code is identical to your current code.',
+                            });
                           }}
                         >
                           Apply Fix

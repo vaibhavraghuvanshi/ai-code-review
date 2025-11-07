@@ -81,26 +81,86 @@ function extractJson(text: string): any {
 
 function isDevMockEnabled() {
   const v = String(process.env.AI_REVIEW_DEV_MOCK || "").toLowerCase();
-  return v === "1" || v === "true" || v === "yes";
+  return v === "0" || v === "true" || v === "yes";
 }
 
 function buildMockReview(code: string, language: string): AiReviewResponse {
-  // Very small, deterministic mock to keep the UI usable in development without a valid key
-  const summary = `Mock review for ${language}: No critical issues found. Consider minor improvements.`;
-  const fixedCode = code; // leave code unchanged in mock
-  const issues: AiIssue[] = [
-    {
-      id: "m1",
-      message: "This is a mock suggestion. Replace var with const when value never changes.",
-      severity: "info",
-      startLine: 1,
-      startColumn: 1,
-      endLine: Math.max(1, code.split("\n").length),
-      endColumn: 1,
-      suggestions: ["Use const/let appropriately", "Run a linter for consistency"],
-    },
-  ];
-  return { summary, fixedCode, issues, model: "mock", temperature: 0, tokens: undefined, cost: undefined };
+  // Deterministic mock to keep UI functional without a valid key.
+  // Produces line‑level issues and edits so highlighting & diff view work.
+  const lines = code.split(/\r?\n/);
+  const issues: AiIssue[] = [];
+  let fixedLines = [...lines];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const lineNo = i + 1;
+    // var -> const suggestion
+    const varIdx = line.indexOf("var ");
+    if (varIdx >= 0) {
+      fixedLines[i] = line.replace(/\bvar\b/, "const");
+      issues.push({
+        id: `mock-var-${lineNo}`,
+        message: "Prefer const/let over var",
+        severity: "warning",
+        startLine: lineNo,
+        startColumn: varIdx + 1,
+        endLine: lineNo,
+        endColumn: varIdx + 4,
+        suggestions: ["Replace var with const if not reassigned"],
+        edits: [{
+          startLine: lineNo,
+          startColumn: varIdx + 1,
+          endLine: lineNo,
+          endColumn: varIdx + 4,
+          newText: "const",
+        }],
+      });
+    }
+    // console.log suggestion
+    const logIdx = line.indexOf("console.log(");
+    if (logIdx >= 0) {
+      issues.push({
+        id: `mock-log-${lineNo}`,
+        message: "Remove debug console.log before committing",
+        severity: "info",
+        startLine: lineNo,
+        startColumn: logIdx + 1,
+        endLine: lineNo,
+        endColumn: Math.max(logIdx + 12, logIdx + 1),
+        suggestions: ["Use a logger or remove"],
+      });
+    }
+    // eval usage (security)
+    const evalIdx = line.indexOf("eval(");
+    if (evalIdx >= 0) {
+      issues.push({
+        id: `mock-eval-${lineNo}`,
+        message: "Avoid eval – security & performance risk",
+        severity: "security",
+        startLine: lineNo,
+        startColumn: evalIdx + 1,
+        endLine: lineNo,
+        endColumn: evalIdx + 5,
+        suggestions: ["Refactor to avoid dynamic code execution"],
+      });
+    }
+  }
+
+  const fixedCode = fixedLines.join("\n");
+  const summaryParts: string[] = [];
+  const counts = {
+    var: issues.filter(i => i.id.startsWith("mock-var")).length,
+    log: issues.filter(i => i.id.startsWith("mock-log")).length,
+    eval: issues.filter(i => i.id.startsWith("mock-eval")).length,
+  };
+  if (counts.var) summaryParts.push(`${counts.var} var→const improvement${counts.var>1?"s":""}`);
+  if (counts.log) summaryParts.push(`${counts.log} debug console.log${counts.log>1?"s":""}`);
+  if (counts.eval) summaryParts.push(`${counts.eval} potential eval risk${counts.eval>1?"s":""}`);
+  const summary = summaryParts.length
+    ? `Mock review (${language}): ${summaryParts.join(", ")}.`
+    : `Mock review (${language}): No notable issues detected.`;
+
+  return { summary, fixedCode, issues, model: "mock", temperature: 0, tokens: 0, cost: 0 };
 }
 
 export async function reviewCodeWithGroq({ code, language, model, strict }: { code: string; language: string; model?: string; strict?: boolean; }): Promise<AiReviewResponse> {
@@ -116,29 +176,34 @@ export async function reviewCodeWithGroq({ code, language, model, strict }: { co
   const MAX_CHARS = 60_000;
   const snippet = code.slice(0, MAX_CHARS);
 
-  const system = `You are a strict code review assistant for ${language} (supports JavaScript, TypeScript, and React JSX). 
-Return ONLY JSON in the following shape and nothing else:
+  const system = `You are a rigorous code review assistant for ${language} (focus on JavaScript/TypeScript/React JSX). 
+Return ONLY JSON in the exact shape below and nothing else:
 {
   "summary": string,
-  "fixedCode": string, // the full file with your suggested fixes applied
+  "fixedCode": string,        // full file with your suggested fixes applied
   "issues": [
     {
-      "id": string, // unique id
-      "message": string, // concise description
+      "id": string,           // unique id
+      "message": string,      // concise, actionable description
       "severity": "error" | "warning" | "info" | "security",
-      "startLine": number, // 1-based
-      "startColumn": number, // 1-based utf16 column
+      "startLine": number,    // 1-based
+      "startColumn": number,  // 1-based utf16 column
       "endLine": number,
       "endColumn": number,
-      "suggestions": string[]
+      "suggestions": string[],
+      "edits": [              // OPTIONAL precise code edits to apply the fix
+        { "startLine": number, "startColumn": number, "endLine": number, "endColumn": number, "newText": string }
+      ]
     }
   ]
 }
-Rules:
-- Coordinates must be 1-based and within the provided code.
-- If you cannot determine a range, target the whole line with startColumn=1 and endColumn=end of line.
-- Keep fixedCode compilable.
-- Prefer minimal, safe changes. Avoid stylistic rewrites unless necessary.`;
+Strict rules:
+- Provide precise ranges within the provided code (1-based). If unsure, target the whole affected line (startColumn=1, endColumn=end of line).
+- Prefer minimal, safe changes that fix correctness, type safety, performance, and security issues.
+- Include edits when a concrete change can be made (e.g., var→const, missing dependency in React useEffect, null checks, parameter validation, escaping).
+- Keep fixedCode compilable and only modify lines necessary to implement your suggestions. Do not perform broad, stylistic rewrites.
+- Focus areas: undefined variables/props, unreachable code, incorrect async/await and error handling, React effect dependencies, null/undefined handling, resource leaks, performance hot paths, security risks (XSS, injection, unsafe eval/innerHTML), and common lint violations.
+- Prefer at most 40 issues; prioritize the most impactful.`;
 
   const user = `LANGUAGE: ${language}\n\nCODE:\n\n${snippet}`;
 
@@ -275,7 +340,7 @@ Rules:
         throw Object.assign(new Error(`Groq API error ${res.status}: ${(txt || "").slice(0,200)}`), { status });
       }
 
-      const data = await res.json();
+  const data = await res.json();
       // Prefer function-calling result if available
       const toolArgsStr: string | undefined = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
       let parsed: any | undefined;
@@ -287,10 +352,10 @@ Rules:
       if (!parsed && !content) {
         throw Object.assign(new Error("Empty AI response"), { status: 502 });
       }
-      const json = parsed ?? extractJson(content);
+  const json = parsed ?? extractJson(content);
 
   // Basic sanitize
-  const issues: AiIssue[] = Array.isArray(json.issues) ? json.issues.map((i: any, idx: number) => ({
+  let issues: AiIssue[] = Array.isArray(json.issues) ? json.issues.map((i: any, idx: number) => ({
     id: String(i.id ?? idx + 1),
     message: String(i.message ?? ""),
     severity: (i.severity === "error" || i.severity === "warning" || i.severity === "info" || i.severity === "security") ? i.severity : "warning",
@@ -310,6 +375,43 @@ Rules:
       : undefined,
   })) : [];
 
+      // Heuristic augmentation when the model returns zero findings:
+      if (!issues.length) {
+        const aug: AiIssue[] = [];
+        const linesArr = snippet.split(/\r?\n/);
+        for (let i = 0; i < linesArr.length; i++) {
+          const ln = i + 1;
+          const line = linesArr[i];
+          if (/\beval\s*\(/.test(line)) {
+            aug.push({
+              id: `heuristic-eval-${ln}`,
+              message: "Avoid eval – security & performance risk",
+              severity: "security",
+              startLine: ln,
+              startColumn: Math.max(1, line.indexOf("eval") + 1),
+              endLine: ln,
+              endColumn: Math.max(1, line.indexOf("eval") + 5),
+              suggestions: ["Refactor to avoid dynamic code execution"],
+            });
+          }
+          if (/console\.log\s*\(/.test(line)) {
+            aug.push({
+              id: `heuristic-log-${ln}`,
+              message: "Remove debug console.log before committing",
+              severity: "info",
+              startLine: ln,
+              startColumn: 1,
+              endLine: ln,
+              endColumn: Math.max(1, line.length),
+              suggestions: ["Use a logger or remove"],
+            });
+          }
+        }
+        if (aug.length) {
+          issues = aug;
+        }
+      }
+
       const fixedCode: string = typeof json.fixedCode === "string" ? json.fixedCode : snippet;
       const summary: string = typeof json.summary === "string" ? json.summary : "";
 
@@ -327,7 +429,7 @@ Rules:
         ? (promptTokens / 1000) * pricePT + (completionTokens / 1000) * priceCT
         : undefined;
 
-      return { summary, fixedCode, issues, model: usedModel, temperature, tokens: totalTokens, cost, raw: data };
+  return { summary, fixedCode, issues, model: usedModel, temperature, tokens: totalTokens, cost, raw: data };
     } catch (e: any) {
       lastErr = e;
       // on parse or other errors, break unless it's a decommission case already handled above
