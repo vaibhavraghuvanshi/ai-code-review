@@ -1,10 +1,10 @@
-import { LogOut } from 'lucide-react';
-import { Button } from './ui/button';
-import { SidebarTrigger } from './ui/sidebar';
-import { ThemeToggle } from './theme-toggle';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { useLocation } from 'wouter';
-import { useEffect, useState } from 'react';
+import { LogOut } from "lucide-react";
+import { Button } from "./ui/button";
+import { SidebarTrigger } from "./ui/sidebar";
+import { ThemeToggle } from "./theme-toggle";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { useLocation } from "wouter";
+import { useEffect, useState } from "react";
 
 export function AppHeader() {
   const [, setLocation] = useLocation();
@@ -12,11 +12,11 @@ export function AppHeader() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('currentUser');
+      const raw = localStorage.getItem("currentUser");
       if (raw) {
         const parsed = JSON.parse(raw) as any;
-        const username = parsed?.username || parsed?.user?.username || '';
-        if (username && typeof username === 'string') {
+        const username = parsed?.username || parsed?.user?.username || "";
+        if (username && typeof username === "string") {
           setInitial(username.trim().charAt(0).toUpperCase() || null);
           return;
         }
@@ -31,13 +31,13 @@ export function AppHeader() {
     // Client-side logout: clear stored user and redirect to landing page
     try {
       // If your server exposes a logout endpoint in future, you can call it here.
-      localStorage.removeItem('currentUser');
+      localStorage.removeItem("currentUser");
     } catch (e) {
-      console.error('Failed to clear localStorage during logout', e);
+      console.error("Failed to clear localStorage during logout", e);
     }
 
     // Redirect to landing page
-    setLocation('/');
+    setLocation("/");
   };
 
   return (
@@ -45,12 +45,12 @@ export function AppHeader() {
       <div className="flex items-center gap-2">
         <SidebarTrigger data-testid="button-sidebar-toggle" />
       </div>
-
+      
       <div className="flex items-center gap-2">
         <ThemeToggle />
         <Avatar className="h-8 w-8">
           <AvatarImage src="" alt="User" />
-          <AvatarFallback>{initial ?? 'JD'}</AvatarFallback>
+          <AvatarFallback>{initial ?? "JD"}</AvatarFallback>
         </Avatar>
         <Button
           variant="ghost"

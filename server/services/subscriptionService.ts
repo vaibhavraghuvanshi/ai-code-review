@@ -164,16 +164,16 @@
 //   return updated;
 // }
 
-import { db } from '../db';
-import { eq, and, lt, or } from 'drizzle-orm';
-import { subscriptions, plans } from '@shared/schema';
-import { addDays } from 'date-fns';
+import { db } from "../db";
+import { eq, and, lt, or } from "drizzle-orm";
+import { subscriptions, plans } from "@shared/schema";
+import { addDays } from "date-fns";
 
 // Helper: append an audit entry to a subscription inside a tx or the root db
 async function appendAudit(
   client: any,
   subId: number,
-  entry: { action: string; by?: string | null; changes?: Record<string, unknown> | null },
+  entry: { action: string; by?: string | null; changes?: Record<string, unknown> | null }
 ) {
   const now = new Date();
   const [existing] = await client
@@ -183,18 +183,13 @@ async function appendAudit(
     .limit(1);
 
   const currentLog: any[] = Array.isArray(existing?.auditLog) ? (existing!.auditLog as any[]) : [];
-  const next = [
-    ...currentLog,
-    {
-      action: entry.action,
-      at: now.toISOString(),
-      ...(entry.by ? { by: entry.by } : {}),
-      ...(entry.changes ? { changes: entry.changes } : {}),
-    },
-  ];
+  const next = [...currentLog, { action: entry.action, at: now.toISOString(), ...(entry.by ? { by: entry.by } : {}), ...(entry.changes ? { changes: entry.changes } : {}) }];
 
   // Be lenient about updatedAt not existing in older DBs
-  await client.update(subscriptions).set({ auditLog: next }).where(eq(subscriptions.id, subId));
+  await client
+    .update(subscriptions)
+    .set({ auditLog: next })
+    .where(eq(subscriptions.id, subId));
 }
 
 // 1) Create subscription (change-plan safe): cancel active/trial then create new (transaction)
@@ -220,15 +215,15 @@ export async function createSubscription(data: {
       .where(
         and(
           eq(subscriptions.userId, data.userId),
-          or(eq(subscriptions.status, 'active'), eq(subscriptions.status, 'trial')),
-        ),
+          or(eq(subscriptions.status, "active"), eq(subscriptions.status, "trial"))
+        )
       );
 
     for (const sub of existing) {
       const [updated] = await tx
         .update(subscriptions)
         .set({
-          status: 'canceled',
+          status: "canceled",
           isAutoRenew: false,
           endDate: now,
           updatedAt: now,
@@ -237,7 +232,7 @@ export async function createSubscription(data: {
         .returning();
 
       await appendAudit(tx, updated.id, {
-        action: 'auto_cancel_on_change_plan',
+        action: "auto_cancel_on_change_plan",
         changes: { previousPlanId: sub.planId },
       });
     }
@@ -248,19 +243,19 @@ export async function createSubscription(data: {
       .values({
         userId: data.userId,
         planId: data.planId,
-        status: data.isTrial ? 'trial' : 'active',
+        status: data.isTrial ? "trial" : "active",
         startDate: now,
         endDate,
         trialEndsAt,
-        paymentMethod: data.paymentMethod ?? (data.isTrial ? 'trial' : 'free'),
-        paymentStatus: data.isTrial ? 'paid' : 'paid',
+        paymentMethod: data.paymentMethod ?? (data.isTrial ? "trial" : "free"),
+        paymentStatus: data.isTrial ? "paid" : "paid",
         isAutoRenew: !data.isTrial,
         auditLog: [],
       })
       .returning();
 
     await appendAudit(tx, created.id, {
-      action: 'created',
+      action: "created",
       changes: { planId: data.planId, isTrial: !!data.isTrial },
     });
 
@@ -275,13 +270,13 @@ export async function renewActiveSubscriptions() {
   const expiringSoon = await db
     .select()
     .from(subscriptions)
-    .where(and(eq(subscriptions.status, 'active'), lt(subscriptions.endDate, nextDay)));
+    .where(and(eq(subscriptions.status, "active"), lt(subscriptions.endDate, nextDay)));
 
   for (const sub of expiringSoon) {
     if (!sub.isAutoRenew) {
       continue;
     }
-    const newEndDate = addDays(sub.endDate ?? now, 30);
+  const newEndDate = addDays(sub.endDate ?? now, 30);
     const [updated] = await db
       .update(subscriptions)
       .set({ endDate: newEndDate, renewalDate: now })
@@ -289,7 +284,7 @@ export async function renewActiveSubscriptions() {
       .returning();
 
     await appendAudit(db, updated.id, {
-      action: 'auto_renew',
+      action: "auto_renew",
       changes: { endDate: newEndDate.toISOString() },
     });
   }
@@ -300,12 +295,12 @@ export async function expireOldSubscriptions() {
   const now = new Date();
   const expired = await db
     .update(subscriptions)
-    .set({ status: 'expired' })
-    .where(and(eq(subscriptions.status, 'active'), lt(subscriptions.endDate, now)))
+    .set({ status: "expired" })
+    .where(and(eq(subscriptions.status, "active"), lt(subscriptions.endDate, now)))
     .returning();
 
   for (const sub of expired) {
-    await appendAudit(db, sub.id, { action: 'expired' });
+    await appendAudit(db, sub.id, { action: "expired" });
   }
   return expired;
 }
@@ -316,12 +311,12 @@ export async function expireTrials() {
 
   const expiredTrials = await db
     .update(subscriptions)
-    .set({ status: 'expired' })
-    .where(and(eq(subscriptions.status, 'trial'), lt(subscriptions.trialEndsAt, now)))
+    .set({ status: "expired" })
+    .where(and(eq(subscriptions.status, "trial"), lt(subscriptions.trialEndsAt, now)))
     .returning();
 
   for (const sub of expiredTrials) {
-    await appendAudit(db, sub.id, { action: 'trial_expired' });
+    await appendAudit(db, sub.id, { action: "trial_expired" });
   }
 }
 
@@ -345,7 +340,7 @@ export async function updateSubscriptionAutoRenew(id: number, isAutoRenew: boole
     .returning();
 
   if (updated) {
-    await appendAudit(db, updated.id, { action: 'toggle_auto_renew', changes: { isAutoRenew } });
+    await appendAudit(db, updated.id, { action: "toggle_auto_renew", changes: { isAutoRenew } });
   }
   return updated;
 }
@@ -355,38 +350,29 @@ export async function cancelSubscription(id: number) {
   const now = new Date();
   const [updated] = await db
     .update(subscriptions)
-    .set({ status: 'canceled', isAutoRenew: false, endDate: now })
+    .set({ status: "canceled", isAutoRenew: false, endDate: now })
     .where(eq(subscriptions.id, id))
     .returning();
 
   if (updated) {
-    await appendAudit(db, updated.id, { action: 'cancel' });
+    await appendAudit(db, updated.id, { action: "cancel" });
   }
   return updated;
 }
 
 // 8) Admin update: status/endDate with audit
-export async function adminUpdateSubscription(
-  id: number,
-  data: { status?: 'active' | 'canceled' | 'expired' | 'trial'; endDate?: Date | null },
-) {
-  const patch: Partial<Pick<typeof subscriptions.$inferInsert, 'status' | 'endDate'>> = {};
-  if (typeof data.status === 'string') patch.status = data.status;
-  if (typeof data.endDate !== 'undefined') patch.endDate = data.endDate;
+export async function adminUpdateSubscription(id: number, data: { status?: "active" | "canceled" | "expired" | "trial"; endDate?: Date | null }) {
+  const patch: Partial<Pick<typeof subscriptions.$inferInsert, "status" | "endDate">> = {};
+  if (typeof data.status === "string") patch.status = data.status;
+  if (typeof data.endDate !== "undefined") patch.endDate = data.endDate;
 
-  const [updated] = await db
-    .update(subscriptions)
-    .set(patch)
-    .where(eq(subscriptions.id, id))
-    .returning();
+  const [updated] = await db.update(subscriptions).set(patch).where(eq(subscriptions.id, id)).returning();
   if (updated) {
     await appendAudit(db, updated.id, {
-      action: 'admin_update',
+      action: "admin_update",
       changes: {
-        ...(typeof data.status === 'string' ? { status: data.status } : {}),
-        ...(typeof data.endDate !== 'undefined'
-          ? { endDate: data.endDate ? data.endDate.toISOString() : null }
-          : {}),
+        ...(typeof data.status === "string" ? { status: data.status } : {}),
+        ...(typeof data.endDate !== "undefined" ? { endDate: data.endDate ? data.endDate.toISOString() : null } : {}),
       },
     });
   }

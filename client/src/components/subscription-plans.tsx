@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Check, Sparkles } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
-import { toast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+import React, { useEffect, useMemo, useState } from "react";
+import { Check, Sparkles } from "lucide-react";
+import { Button } from "./ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
+import { toast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 type Plan = {
   id: number;
@@ -19,7 +19,7 @@ type Subscription = {
   id: number;
   userId: string;
   planId: number | null;
-  status: 'active' | 'canceled' | 'expired' | 'trial';
+  status: "active" | "canceled" | "expired" | "trial";
 };
 
 export function SubscriptionPlans() {
@@ -31,47 +31,47 @@ export function SubscriptionPlans() {
   const defaultPlans: Plan[] = [
     {
       id: 1,
-      name: 'Free',
-      description: 'Perfect for trying out AI code reviews',
+      name: "Free",
+      description: "Perfect for trying out AI code reviews",
       price: 0,
-      currency: 'USD',
+      currency: "USD",
       features: [
-        'Basic code analysis',
-        'Up to 5 reviews/month',
-        'Community support',
-        'Limited AI suggestions',
+        "Basic code analysis",
+        "Up to 5 reviews/month",
+        "Community support",
+        "Limited AI suggestions",
       ],
       featured: false,
     },
     {
       id: 2,
-      name: 'Pro',
-      description: 'Unlock advanced AI features, higher review limits, and priority support.',
+      name: "Pro",
+      description: "Unlock advanced AI features, higher review limits, and priority support.",
       price: 29,
-      currency: 'USD',
+      currency: "USD",
       features: [
-        'Advanced code analysis',
-        'Unlimited reviews',
-        'Priority email support',
-        'Intelligent AI suggestions',
-        'CI/CD integration',
-        'Detailed reporting',
+        "Advanced code analysis",
+        "Unlimited reviews",
+        "Priority email support",
+        "Intelligent AI suggestions",
+        "CI/CD integration",
+        "Detailed reporting",
       ],
       featured: true,
     },
     {
       id: 3,
-      name: 'Enterprise',
-      description: 'Custom AI models and dedicated support for large teams.',
-      price: 'Custom',
-      currency: 'USD',
+      name: "Enterprise",
+      description: "Custom AI models and dedicated support for large teams.",
+      price: "Custom",
+      currency: "USD",
       features: [
-        'All Pro features',
-        'Dedicated account manager',
-        'On-premise deployment',
-        'Custom AI models',
-        'Advanced security features',
-        'SLA agreements',
+        "All Pro features",
+        "Dedicated account manager",
+        "On-premise deployment",
+        "Custom AI models",
+        "Advanced security features",
+        "SLA agreements",
       ],
       featured: false,
     },
@@ -82,7 +82,7 @@ export function SubscriptionPlans() {
     (async () => {
       setLoading(true);
       try {
-        const raw = localStorage.getItem('currentUser');
+        const raw = localStorage.getItem("currentUser");
         if (raw) {
           try {
             const u = JSON.parse(raw);
@@ -90,19 +90,19 @@ export function SubscriptionPlans() {
           } catch {}
         }
 
-        const resPlans = await apiRequest('GET', '/api/plans');
-        const planItems = await resPlans.json();
-        const serverPlans = Array.isArray(planItems) ? (planItems as Plan[]) : [];
-        if (mounted) setPlans(serverPlans.length > 0 ? serverPlans : defaultPlans);
+  const resPlans = await apiRequest("GET", "/api/plans");
+  const planItems = await resPlans.json();
+  const serverPlans = Array.isArray(planItems) ? (planItems as Plan[]) : [];
+  if (mounted) setPlans(serverPlans.length > 0 ? serverPlans : defaultPlans);
 
         if (userId || (raw && JSON.parse(raw)?.id)) {
           const uid = userId ?? JSON.parse(raw!).id;
-          const resSubs = await apiRequest('GET', `/api/users/${uid}/subscriptions`);
+          const resSubs = await apiRequest("GET", `/api/users/${uid}/subscriptions`);
           const subsData = await resSubs.json();
           if (mounted) setSubs(Array.isArray(subsData) ? subsData : []);
         }
       } catch (e: any) {
-        console.warn('Failed to load plans:', e?.message);
+        console.warn("Failed to load plans:", e?.message);
         if (mounted) setPlans(defaultPlans);
       } finally {
         if (mounted) setLoading(false);
@@ -115,13 +115,13 @@ export function SubscriptionPlans() {
   }, []);
 
   const currentPlanId = useMemo(() => {
-    const active = subs.find((s) => s && (s.status === 'active' || s.status === 'trial'));
+    const active = subs.find((s) => s && (s.status === "active" || s.status === "trial"));
     return active?.planId ?? null;
   }, [subs]);
 
   function planPriceLabel(p: Plan) {
-    if (typeof p.price === 'number') return `$${p.price.toFixed(2)}`;
-    if (p.price == null) return '';
+    if (typeof p.price === "number") return `$${p.price.toFixed(2)}`;
+    if (p.price == null) return "";
     return String(p.price);
   }
 
@@ -133,42 +133,32 @@ export function SubscriptionPlans() {
       const arr = JSON.parse(String(raw));
       return Array.isArray(arr) ? arr.map(String) : [];
     } catch {
-      return String(raw)
-        .split(/\s*,\s*/)
-        .filter(Boolean);
+      return String(raw).split(/\s*,\s*/).filter(Boolean);
     }
   }
 
   async function handleSubscribe(planId: number, planName: string) {
     if (!userId) {
-      toast({
-        title: 'Please sign in',
-        description: 'Log in to subscribe to a plan',
-        variant: 'destructive',
-      });
+      toast({ title: "Please sign in", description: "Log in to subscribe to a plan", variant: "destructive" });
       return;
     }
     if (currentPlanId === planId) {
-      toast({ title: 'Already on this plan', description: `You're already on ${planName}` });
+      toast({ title: "Already on this plan", description: `You're already on ${planName}` });
       return;
     }
     setSaving(true);
     try {
-      const res = await apiRequest('POST', '/api/subscriptions', { userId, planId });
+      const res = await apiRequest("POST", "/api/subscriptions", { userId, planId });
       await res.json();
-      toast({ title: 'Subscription updated', description: `You're now on ${planName}` });
+      toast({ title: "Subscription updated", description: `You're now on ${planName}` });
       // Refresh subs
       try {
-        const resSubs = await apiRequest('GET', `/api/users/${userId}/subscriptions`);
+        const resSubs = await apiRequest("GET", `/api/users/${userId}/subscriptions`);
         const subsData = await resSubs.json();
         setSubs(Array.isArray(subsData) ? subsData : []);
       } catch {}
     } catch (err: any) {
-      toast({
-        title: 'Subscribe failed',
-        description: err?.message ?? 'Server error',
-        variant: 'destructive',
-      });
+      toast({ title: "Subscribe failed", description: err?.message ?? "Server error", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -196,7 +186,7 @@ export function SubscriptionPlans() {
             <Card
               key={plan.id}
               className={`relative hover-elevate transition-all duration-200 flex flex-col ${
-                plan.featured ? 'border-2 border-primary shadow-lg' : ''
+                plan.featured ? "border-2 border-primary shadow-lg" : ""
               }`}
               data-testid={`card-plan-${plan.name.toLowerCase()}`}
             >
@@ -219,7 +209,7 @@ export function SubscriptionPlans() {
                 <h3 className="text-2xl font-semibold">{plan.name}</h3>
                 <div className="mt-4">
                   <span className="text-4xl font-bold">{planPriceLabel(plan)}</span>
-                  <span className="text-muted-foreground">{plan.price ? '/month' : ''}</span>
+                  <span className="text-muted-foreground">{plan.price ? "/month" : ""}</span>
                 </div>
                 {plan.description && (
                   <p className="text-sm text-muted-foreground mt-3">{plan.description}</p>
@@ -237,13 +227,13 @@ export function SubscriptionPlans() {
               </CardContent>
               <CardFooter className="pt-6">
                 <Button
-                  variant={isCurrent ? 'secondary' : 'default'}
+                  variant={isCurrent ? "secondary" : "default"}
                   className="w-full"
                   data-testid={`button-${plan.name.toLowerCase()}-plan`}
                   disabled={saving || (isCurrent && !!userId)}
                   onClick={() => handleSubscribe(plan.id, plan.name)}
                 >
-                  {isCurrent ? 'Current Plan' : userId ? 'Choose Plan' : 'Sign in to Subscribe'}
+                  {isCurrent ? "Current Plan" : userId ? "Choose Plan" : "Sign in to Subscribe"}
                 </Button>
               </CardFooter>
             </Card>
@@ -259,8 +249,7 @@ export function SubscriptionPlans() {
           <div>
             <h4 className="font-medium mb-2">Can I switch plans at any time?</h4>
             <p className="text-sm text-muted-foreground">
-              Yes! You can upgrade or downgrade your plan at any time. Changes take effect
-              immediately.
+              Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately.
             </p>
           </div>
           <div>

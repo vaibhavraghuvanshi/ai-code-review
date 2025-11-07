@@ -1,8 +1,11 @@
-import { db } from './db'; // drizzle db client (configured with postgres/neon)
-import { users, reviews } from '../shared/schema';
-import { eq } from 'drizzle-orm';
+import { db } from "./db"; // drizzle db client (configured with postgres/neon)
+import { users, reviews } from "../shared/schema";
+import { eq } from "drizzle-orm";
 
-import type { User, InsertUser, Review, InsertReview } from '@shared/schema';
+import type { 
+  User, InsertUser, 
+  Review, InsertReview 
+} from "@shared/schema";
 
 // Define storage interface
 export interface IStorage {
@@ -17,6 +20,8 @@ export interface IStorage {
   getReviewsByUser(userId: string): Promise<Review[]>;
   getAllReviews(): Promise<Review[]>;
   deleteReview(id: number): Promise<boolean>;
+
+  
 }
 
 // Implementation using Drizzle

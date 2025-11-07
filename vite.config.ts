@@ -13,6 +13,8 @@ if (process.env.NODE_ENV !== 'production' && process.env.REPL_ID !== undefined) 
   // They can be added back with dynamic import if needed
 }
 
+
+
 export default defineConfig({
   plugins,
   resolve: {
@@ -31,6 +33,9 @@ export default defineConfig({
     fs: {
       strict: true,
       deny: ['**/.*'],
+    },
+    hmr: {
+      overlay: false,
     },
   },
 });

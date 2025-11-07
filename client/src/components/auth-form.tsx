@@ -1,34 +1,35 @@
-import { useState } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { SiGoogle, SiGithub } from 'react-icons/si';
-import { useLocation } from 'wouter';
-import { apiRequest } from '@/lib/queryClient';
-import { toast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { SiGoogle, SiGithub } from "react-icons/si";
+import { useLocation } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
+import { toast } from "@/hooks/use-toast";
 
 export function AuthForm() {
   const [, setLocation] = useLocation();
 
   // Login state (login by username per server routes)
-  const [loginUsername, setLoginUsername] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  const [loginUsername, setLoginUsername] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginLoading, setLoginLoading] = useState(false);
 
   // Signup state
-  const [signupUsername, setSignupUsername] = useState('');
-  const [signupEmail, setSignupEmail] = useState('');
-  const [signupPassword, setSignupPassword] = useState('');
-  const [signupConfirm, setSignupConfirm] = useState('');
+  const [signupUsername, setSignupUsername] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [signupConfirm, setSignupConfirm] = useState("");
   const [signupError, setSignupError] = useState<string | null>(null);
   const [signupLoading, setSignupLoading] = useState(false);
 
   // Basic validators
   const isValidUsername = (v: string) => v.trim().length >= 3;
-  const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+  const isValidEmail = (v: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
   const isValidPassword = (v: string) => v.length >= 8;
 
   // Login handler: uses server GET /api/users/username/:username
@@ -37,7 +38,7 @@ export function AuthForm() {
     setLoginError(null);
 
     if (!isValidUsername(loginUsername)) {
-      setLoginError('Enter a valid username (min 3 characters).');
+      setLoginError("Enter a valid username (min 3 characters).");
       return;
     }
 
@@ -45,21 +46,23 @@ export function AuthForm() {
     try {
       // server route: [server/routes.ts] handles GET /api/users/username/:username
       // symbol: [`storage.createUser`](server/routes.ts) is used by signup route
-      const url = `/api/users/username/${encodeURIComponent(loginUsername.trim())}`;
-      const res = await apiRequest('GET', url);
+      const url = `/api/users/username/${encodeURIComponent(
+        loginUsername.trim()
+      )}`;
+      const res = await apiRequest("GET", url);
       const user = await res.json();
 
       // If user found, treat as "logged in" (this app uses simple sessionless flow).
       // In a real app you'd verify password and create a server session / JWT.
-      console.log('Logged in:', user);
-      // store minimal session in localStorage for client navigation
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      toast({ title: 'Logged in', description: `Welcome back ${user.username || 'user'}` });
-      setLocation('/dashboard');
+  console.log("Logged in:", user);
+  // store minimal session in localStorage for client navigation
+  localStorage.setItem("currentUser", JSON.stringify(user));
+  toast({ title: "Logged in", description: `Welcome back ${user.username || "user"}` });
+  setLocation("/dashboard");
     } catch (err: any) {
-      const message = err?.message || 'Login failed. User not found or server error.';
+      const message = err?.message || "Login failed. User not found or server error.";
       setLoginError(message);
-      toast({ title: 'Login failed', description: message, variant: 'destructive' });
+      toast({ title: "Login failed", description: message, variant: "destructive" });
     } finally {
       setLoginLoading(false);
     }
@@ -71,38 +74,38 @@ export function AuthForm() {
     setSignupError(null);
 
     if (!isValidUsername(signupUsername)) {
-      setSignupError('Username must be at least 3 characters.');
+      setSignupError("Username must be at least 3 characters.");
       return;
     }
     if (!isValidEmail(signupEmail)) {
-      setSignupError('Enter a valid email address.');
+      setSignupError("Enter a valid email address.");
       return;
     }
     if (!isValidPassword(signupPassword)) {
-      setSignupError('Password must be at least 8 characters.');
+      setSignupError("Password must be at least 8 characters.");
       return;
     }
     if (signupPassword !== signupConfirm) {
-      setSignupError('Passwords do not match.');
+      setSignupError("Passwords do not match.");
       return;
     }
 
     setSignupLoading(true);
     try {
       // Server route: POST /api/users -> [server/routes.ts]
-      const res = await apiRequest('POST', '/api/users', {
+      const res = await apiRequest("POST", "/api/users", {
         username: signupUsername.trim(),
         email: signupEmail.trim(),
       });
       const created = await res.json();
-      console.log('User created:', created);
-      localStorage.setItem('currentUser', JSON.stringify(created));
-      toast({ title: 'Sign up successful', description: `Welcome ${created.username || 'user'}` });
-      setLocation('/dashboard');
+      console.log("User created:", created);
+      localStorage.setItem("currentUser", JSON.stringify(created));
+      toast({ title: "Sign up successful", description: `Welcome ${created.username || "user"}` });
+      setLocation("/dashboard");
     } catch (err: any) {
-      const message = err?.message || 'Signup failed. Server error.';
+      const message = err?.message || "Signup failed. Server error.";
       setSignupError(message);
-      toast({ title: 'Signup failed', description: message, variant: 'destructive' });
+      toast({ title: "Signup failed", description: message, variant: "destructive" });
     } finally {
       setSignupLoading(false);
     }
@@ -120,12 +123,8 @@ export function AuthForm() {
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login" data-testid="tab-login">
-                Login
-              </TabsTrigger>
-              <TabsTrigger value="signup" data-testid="tab-signup">
-                Sign Up
-              </TabsTrigger>
+              <TabsTrigger value="login" data-testid="tab-login">Login</TabsTrigger>
+              <TabsTrigger value="signup" data-testid="tab-signup">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="login">
@@ -159,13 +158,8 @@ export function AuthForm() {
                     Forgot Password?
                   </a>
                 </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  data-testid="button-login"
-                  disabled={loginLoading}
-                >
-                  {loginLoading ? 'Logging in...' : 'Login'}
+                <Button type="submit" className="w-full" data-testid="button-login" disabled={loginLoading}>
+                  {loginLoading ? "Logging in..." : "Login"}
                 </Button>
               </form>
             </TabsContent>
@@ -218,13 +212,8 @@ export function AuthForm() {
 
                 {signupError && <div className="text-sm text-destructive">{signupError}</div>}
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  data-testid="button-signup"
-                  disabled={signupLoading}
-                >
-                  {signupLoading ? 'Signing up...' : 'Sign Up'}
+                <Button type="submit" className="w-full" data-testid="button-signup" disabled={signupLoading}>
+                  {signupLoading ? "Signing up..." : "Sign Up"}
                 </Button>
               </form>
             </TabsContent>
@@ -245,8 +234,8 @@ export function AuthForm() {
               className="w-full gap-2"
               onClick={() => {
                 // Social buttons are stubs for now
-                console.log('Social login clicked: Google');
-                setLocation('/dashboard');
+                console.log("Social login clicked: Google");
+                setLocation("/dashboard");
               }}
               data-testid="button-google-login"
             >
@@ -257,8 +246,8 @@ export function AuthForm() {
               variant="outline"
               className="w-full gap-2"
               onClick={() => {
-                console.log('Social login clicked: GitHub');
-                setLocation('/dashboard');
+                console.log("Social login clicked: GitHub");
+                setLocation("/dashboard");
               }}
               data-testid="button-github-login"
             >
@@ -271,3 +260,4 @@ export function AuthForm() {
     </div>
   );
 }
+

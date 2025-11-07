@@ -1,14 +1,14 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Badge } from './ui/badge';
-import { Separator } from './ui/separator';
-import { Check, RefreshCw, XCircle } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import { Switch } from './ui/switch';
+import React, { useEffect, useMemo, useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Badge } from "./ui/badge";
+import { Separator } from "./ui/separator";
+import { Check, RefreshCw, XCircle } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { Switch } from "./ui/switch";
 
 export type ManageSubscriptionProps = {
   open: boolean;
@@ -30,7 +30,7 @@ type Subscription = {
   id: number;
   userId: string;
   planId: number | null;
-  status: 'active' | 'canceled' | 'expired' | 'trial';
+  status: "active" | "canceled" | "expired" | "trial";
   startDate?: string | Date | null;
   endDate?: string | Date | null;
   renewalDate?: string | Date | null;
@@ -53,44 +53,40 @@ export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubs
     (async () => {
       setLoading(true);
       try {
-        const raw = localStorage.getItem('currentUser');
-        if (!raw) throw new Error('No signed-in user');
+        const raw = localStorage.getItem("currentUser");
+        if (!raw) throw new Error("No signed-in user");
         const u = JSON.parse(raw);
-        if (!u?.id) throw new Error('Invalid user session');
+        if (!u?.id) throw new Error("Invalid user session");
         if (!mounted) return;
         setUserId(u.id as string);
 
         // Plans
         try {
-          const resPlans = await apiRequest('GET', '/api/plans');
+          const resPlans = await apiRequest("GET", "/api/plans");
           const planItems = await resPlans.json();
           if (mounted) setPlans(Array.isArray(planItems) ? planItems : []);
         } catch (e: any) {
-          console.warn('Failed to fetch plans:', e?.message);
+          console.warn("Failed to fetch plans:", e?.message);
           if (mounted) setPlans([]);
         }
 
         // Subscriptions
         try {
-          const resSubs = await apiRequest('GET', `/api/users/${u.id}/subscriptions`);
+          const resSubs = await apiRequest("GET", `/api/users/${u.id}/subscriptions`);
           const subsData = await resSubs.json();
           const list = Array.isArray(subsData) ? subsData : [];
           if (mounted) {
             setSubs(list);
             // Preselect current plan if available
-            const active = list.find((s) => s && (s.status === 'active' || s.status === 'trial'));
+            const active = list.find((s) => s && (s.status === "active" || s.status === "trial"));
             if (active?.planId) setSelectedPlanId(active.planId);
           }
         } catch (e: any) {
-          console.warn('Failed to fetch subscriptions:', e?.message);
+          console.warn("Failed to fetch subscriptions:", e?.message);
           if (mounted) setSubs([]);
         }
       } catch (err: any) {
-        toast({
-          title: 'Not signed in',
-          description: err?.message ?? 'Please sign in',
-          variant: 'destructive',
-        });
+        toast({ title: "Not signed in", description: err?.message ?? "Please sign in", variant: "destructive" });
       } finally {
         if (mounted) setLoading(false);
       }
@@ -102,7 +98,7 @@ export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubs
   }, [open]);
 
   const currentSub = useMemo(() => {
-    return subs.find((s) => s && (s.status === 'active' || s.status === 'trial')) ?? null;
+    return subs.find((s) => s && (s.status === "active" || s.status === "trial")) ?? null;
   }, [subs]);
 
   const currentPlan = useMemo(() => {
@@ -118,56 +114,44 @@ export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubs
       const arr = JSON.parse(String(raw));
       return Array.isArray(arr) ? arr.map(String) : [];
     } catch {
-      return String(raw)
-        .split(/\s*,\s*/)
-        .filter(Boolean);
+      return String(raw).split(/\s*,\s*/).filter(Boolean);
     }
   }, [currentPlan?.features]);
 
   async function handleChangePlan() {
     if (!userId) {
-      toast({ title: 'Not signed in', description: 'Please sign in', variant: 'destructive' });
+      toast({ title: "Not signed in", description: "Please sign in", variant: "destructive" });
       return;
     }
     if (!selectedPlanId) {
-      toast({
-        title: 'Select a plan',
-        description: 'Choose a plan to continue',
-        variant: 'destructive',
-      });
+      toast({ title: "Select a plan", description: "Choose a plan to continue", variant: "destructive" });
       return;
     }
 
     setSaving(true);
     try {
-      const res = await apiRequest('POST', '/api/subscriptions', {
+      const res = await apiRequest("POST", "/api/subscriptions", {
         userId,
         planId: Number(selectedPlanId),
       });
       await res.json();
       toast({
-        title: 'Subscription updated',
-        description: `You're now on the ${plans.find((p) => p.id === selectedPlanId)?.name ?? 'selected'} plan`,
+        title: "Subscription updated",
+        description: `You're now on the ${plans.find((p) => p.id === selectedPlanId)?.name ?? "selected"} plan`,
       });
       // Refresh subs
       try {
-        const resSubs = await apiRequest('GET', `/api/users/${userId}/subscriptions`);
+        const resSubs = await apiRequest("GET", `/api/users/${userId}/subscriptions`);
         const subsData = await resSubs.json();
         setSubs(Array.isArray(subsData) ? subsData : []);
       } catch {
         // ignore
       }
       // Inform parent and close dialog
-      try {
-        onChanged && onChanged();
-      } catch {}
+      try { onChanged && onChanged(); } catch {}
       onOpenChange(false);
     } catch (err: any) {
-      toast({
-        title: 'Update failed',
-        description: err?.message ?? 'Server error',
-        variant: 'destructive',
-      });
+      toast({ title: "Update failed", description: err?.message ?? "Server error", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -175,11 +159,7 @@ export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubs
 
   async function handleToggleAutoRenew() {
     if (!currentSub) {
-      toast({
-        title: 'No subscription',
-        description: 'You have no active subscription to update.',
-        variant: 'destructive',
-      });
+      toast({ title: "No subscription", description: "You have no active subscription to update.", variant: "destructive" });
       return;
     }
 
@@ -187,16 +167,12 @@ export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubs
     const newVal = !Boolean(currentSub.isAutoRenew);
     setSaving(true);
     try {
-      const res = await apiRequest('PATCH', `/api/subscriptions/${id}`, { isAutoRenew: newVal });
+      const res = await apiRequest("PATCH", `/api/subscriptions/${id}`, { isAutoRenew: newVal });
       const updated = await res.json();
       setSubs((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
-      toast({ title: 'Updated', description: `Auto-renew ${newVal ? 'enabled' : 'disabled'}` });
+      toast({ title: "Updated", description: `Auto-renew ${newVal ? "enabled" : "disabled"}` });
     } catch (err: any) {
-      toast({
-        title: 'Update failed',
-        description: err?.message ?? 'Server error',
-        variant: 'destructive',
-      });
+      toast({ title: "Update failed", description: err?.message ?? "Server error", variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -204,39 +180,29 @@ export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubs
 
   async function handleCancelSubscription() {
     if (!currentSub) {
-      toast({
-        title: 'No subscription',
-        description: 'You have no active subscription to cancel.',
-        variant: 'destructive',
-      });
+      toast({ title: "No subscription", description: "You have no active subscription to cancel.", variant: "destructive" });
       return;
     }
     const id = currentSub.id;
     setSaving(true);
     try {
-      const res = await apiRequest('PATCH', `/api/subscriptions/${id}`, { action: 'cancel' });
+      const res = await apiRequest("PATCH", `/api/subscriptions/${id}`, { action: "cancel" });
       const updated = await res.json();
       setSubs((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
-      toast({ title: 'Canceled', description: 'Subscription canceled' });
-      try {
-        onChanged && onChanged();
-      } catch {}
+      toast({ title: "Canceled", description: "Subscription canceled" });
+      try { onChanged && onChanged(); } catch {}
       // Optional: Close after cancel as well
       onOpenChange(false);
     } catch (err: any) {
-      toast({
-        title: 'Cancel failed',
-        description: err?.message ?? 'Server error',
-        variant: 'destructive',
-      });
+      toast({ title: "Cancel failed", description: err?.message ?? "Server error", variant: "destructive" });
     } finally {
       setSaving(false);
     }
   }
 
   function priceLabel(p: Plan) {
-    if (typeof p.price === 'number') return `$${p.price.toFixed(2)}`;
-    return String(p.price ?? '');
+    if (typeof p.price === "number") return `$${p.price.toFixed(2)}`;
+    return String(p.price ?? "");
   }
 
   return (
@@ -253,7 +219,7 @@ export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubs
               <CardTitle className="flex items-center gap-2">
                 Current Plan
                 {currentSub?.status && (
-                  <Badge variant={currentSub.status === 'active' ? 'default' : 'outline'}>
+                  <Badge variant={currentSub.status === "active" ? "default" : "outline"}>
                     {currentSub.status}
                   </Badge>
                 )}
@@ -284,20 +250,14 @@ export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubs
                   )}
 
                   <div className="mt-4">
-                    <Button
-                      variant="outline"
-                      onClick={handleCancelSubscription}
-                      data-testid="button-cancel-plan"
-                    >
+                    <Button variant="outline" onClick={handleCancelSubscription} data-testid="button-cancel-plan">
                       <XCircle className="h-4 w-4 mr-2" />
                       Cancel Subscription
                     </Button>
                   </div>
                 </>
               ) : (
-                <div className="text-sm text-muted-foreground">
-                  No active plan. You’re on the free tier.
-                </div>
+                <div className="text-sm text-muted-foreground">No active plan. You’re on the free tier.</div>
               )}
             </CardContent>
           </Card>
@@ -317,7 +277,7 @@ export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubs
                   disabled={loading}
                 >
                   <SelectTrigger data-testid="select-change-plan">
-                    <SelectValue placeholder={loading ? 'Loading…' : 'Choose a plan'} />
+                    <SelectValue placeholder={loading ? "Loading…" : "Choose a plan"} />
                   </SelectTrigger>
                   <SelectContent>
                     {plans.map((p) => (
@@ -330,24 +290,16 @@ export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubs
               </div>
 
               <div className="flex gap-3">
-                <Button
-                  onClick={handleChangePlan}
-                  disabled={saving || loading}
-                  data-testid="button-update-plan"
-                >
+                <Button onClick={handleChangePlan} disabled={saving || loading} data-testid="button-update-plan">
                   {saving ? (
                     <>
                       <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> Updating…
                     </>
                   ) : (
-                    'Update Plan'
+                    "Update Plan"
                   )}
                 </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleCancelSubscription}
-                  data-testid="button-cancel-plan"
-                >
+                <Button variant="outline" onClick={handleCancelSubscription} data-testid="button-cancel-plan">
                   <XCircle className="h-4 w-4 mr-2" />
                   Cancel Subscription
                 </Button>
@@ -363,9 +315,7 @@ export function ManageSubscription({ open, onOpenChange, onChanged }: ManageSubs
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium">Auto renew</div>
-                  <div className="text-xs text-muted-foreground">
-                    Toggle to enable or disable automatic renewals
-                  </div>
+                  <div className="text-xs text-muted-foreground">Toggle to enable or disable automatic renewals</div>
                 </div>
                 <div>
                   <Switch
