@@ -7,9 +7,11 @@ import { Editor, BeforeMount } from "@monaco-editor/react";
 import { useToast } from '@/hooks/use-toast';
 import { applyAppTheme, getThemeName } from '@/lib/monacoTheme';
 import { diffLines, computeWordDiffForModifiedChunksDual } from '@/lib/diff';
+import { useT } from '@/hooks/useI18n';
 import { useTheme } from "@/components/theme-provider";
 
 export default function ReviewDetails() {
+  const t = useT();
   const [, setLocation] = useLocation();
   const [match, params] = useRoute("/reviews/:id");
   const id = params?.id;
@@ -124,7 +126,7 @@ export default function ReviewDetails() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Summary</CardTitle>
+         <CardTitle>{t('reviewDetails')}</CardTitle>
         </CardHeader>
         <CardContent>
           {review?.reviewText ? (

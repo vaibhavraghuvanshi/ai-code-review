@@ -14,7 +14,7 @@ const plans = [
       'Community support',
       'Limited AI suggestions',
     ],
-    cta: 'Current Plan',
+    cta: 'Free Plan',
     variant: 'secondary' as const,
   },
   {

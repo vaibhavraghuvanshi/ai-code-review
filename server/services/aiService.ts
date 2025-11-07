@@ -79,9 +79,36 @@ function extractJson(text: string): any {
   }
 }
 
+function isDevMockEnabled() {
+  const v = String(process.env.AI_REVIEW_DEV_MOCK || "").toLowerCase();
+  return v === "1" || v === "true" || v === "yes";
+}
+
+function buildMockReview(code: string, language: string): AiReviewResponse {
+  // Very small, deterministic mock to keep the UI usable in development without a valid key
+  const summary = `Mock review for ${language}: No critical issues found. Consider minor improvements.`;
+  const fixedCode = code; // leave code unchanged in mock
+  const issues: AiIssue[] = [
+    {
+      id: "m1",
+      message: "This is a mock suggestion. Replace var with const when value never changes.",
+      severity: "info",
+      startLine: 1,
+      startColumn: 1,
+      endLine: Math.max(1, code.split("\n").length),
+      endColumn: 1,
+      suggestions: ["Use const/let appropriately", "Run a linter for consistency"],
+    },
+  ];
+  return { summary, fixedCode, issues, model: "mock", temperature: 0, tokens: undefined, cost: undefined };
+}
+
 export async function reviewCodeWithGroq({ code, language, model, strict }: { code: string; language: string; model?: string; strict?: boolean; }): Promise<AiReviewResponse> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
+    if (isDevMockEnabled()) {
+      return buildMockReview(code, language);
+    }
     throw Object.assign(new Error("Server missing GROQ_API_KEY"), { status: 500 });
   }
 
@@ -206,8 +233,15 @@ Rules:
 
         // Auth/permission issues will not be fixed by changing models
         if (res.status === 401 || res.status === 403) {
+          if (isDevMockEnabled()) {
+            // Fall back to mock response in development to unblock UI
+            return buildMockReview(code, language);
+          }
           const err = Object.assign(
-            new Error(`Groq auth error ${res.status}: ${txt || "Unauthorized - check GROQ_API_KEY"}`),
+            new Error(
+              `Groq auth error ${res.status}: ${txt || "Unauthorized - check GROQ_API_KEY"}. ` +
+              "Set a valid GROQ_API_KEY in your .env and restart the dev server."
+            ),
             { status: res.status }
           );
           lastErr = err;

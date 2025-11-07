@@ -3,6 +3,7 @@ import { Eye, Plus, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
+import { useT } from '@/hooks/useI18n';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
 export function ReviewTable() {
+  const t = useT();
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [rows, setRows] = useState<any[]>([]);
@@ -35,24 +37,6 @@ export function ReviewTable() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingId, setPendingId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
-
-  // useEffect(() => {
-  //   let mounted = true;
-  //   (async () => {
-  //     try {
-  //       setLoading(true);
-  //       const res = await fetch("/api/reviews");
-  //       if (!res.ok) throw new Error("Failed to fetch reviews");
-  //       const data = await res.json();
-  //       if (mounted) setRows(Array.isArray(data) ? data : []);
-  //     } catch (e) {
-  //       console.error(e);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   })();
-  //   return () => { mounted = false; };
-  // }, []);
 
    useEffect(() => {
     let mounted = true;
@@ -128,19 +112,19 @@ export function ReviewTable() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Input
-          placeholder="Search reviews..."
+          placeholder={t('searchReviewsPlaceholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
           data-testid="input-search-reviews"
         />
-        <Button 
-          className="gap-2" 
+        <Button
+          className="gap-2"
           onClick={() => setLocation("/dashboard")}
           data-testid="button-new-review"
         >
           <Plus className="h-4 w-4" />
-          New Review
+          {t('newReview')}
         </Button>
       </div>
 
