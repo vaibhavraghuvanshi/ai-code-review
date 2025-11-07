@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global font-size classes applied to <html> by PreferencesProvider */
+html.font-small { font-size: 14px; }
+html.font-medium { font-size: 16px; }
+html.font-large { font-size: 18px; }
+html.font-xl { font-size: 20px; }
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);

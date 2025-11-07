@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Editor, { OnMount, BeforeMount } from "@monaco-editor/react";
 import { applyAppTheme, getThemeName } from "@/lib/monacoTheme";
 import { useTheme } from "./theme-provider";
+import { usePreferences } from "./preferences-provider";
 import { Upload, Sparkles, Lightbulb, PanelRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -188,6 +189,7 @@ export function CodeEditor() {
   const diffModifiedPath = useMemo(() => `file:///__diff__/modified${pathExt}`,[pathExt]);
 
   const { theme } = useTheme();
+  const { fontSize, codeTheme } = usePreferences();
   const monacoRef = useRef<any>(null);
   const editorRef = useRef<any>(null);
   const currentThemeName = getThemeName(theme === 'dark' ? 'dark' : 'light');
@@ -214,11 +216,40 @@ export function CodeEditor() {
     monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({ noSemanticValidation: false, noSyntaxValidation: false });
   }
 
+  function defineExtraEditorThemes(monaco: any) {
+    // Minimal theme definitions for additional editor themes
+    const ensure = (name: string, base: 'vs' | 'vs-dark', colors: Record<string,string> = {}) => {
+      const exists = (monaco.editor as any)._themeService?._knownThemes?.has(name);
+      if (!exists) {
+        monaco.editor.defineTheme(name, { base, inherit: true, rules: [], colors });
+      }
+    };
+    ensure('monokai', 'vs-dark', {
+      'editor.background': '#272822',
+      'editor.foreground': '#F8F8F2',
+      'editorLineNumber.foreground': '#75715E',
+      'editor.selectionBackground': '#49483E',
+    });
+    ensure('github-dark', 'vs-dark', {
+      'editor.background': '#0d1117',
+      'editor.foreground': '#c9d1d9',
+      'editorLineNumber.foreground': '#6e7681',
+      'editor.selectionBackground': '#1f6feb55',
+    });
+    ensure('dracula', 'vs-dark', {
+      'editor.background': '#282a36',
+      'editor.foreground': '#f8f8f2',
+      'editorLineNumber.foreground': '#6272a4',
+      'editor.selectionBackground': '#44475a',
+    });
+  }
+
   const extraLibsAddedRef = useRef(false);
 
   const handleEditorBeforeMount: BeforeMount = (monaco) => {
     monacoRef.current = monaco;
     defineAppTheme(monaco);
+    defineExtraEditorThemes(monaco);
     if (!extraLibsAddedRef.current) {
       const jsxTypes = [
         'declare namespace JSX {',
@@ -258,7 +289,8 @@ export function CodeEditor() {
     editor.updateOptions({ glyphMargin: true });
   };
 
-  const monacoTheme = currentThemeName;
+  // Decide editor theme: follow app or explicit selection
+  const monacoTheme = codeTheme === 'app' ? currentThemeName : codeTheme;
 
   useEffect(() => {
     const monaco = monacoRef.current;
@@ -817,7 +849,7 @@ export function CodeEditor() {
             onMount={handleEditorMount}
             options={{
               minimap: { enabled: false },
-              fontSize: 13,
+              fontSize: fontSize === 'small' ? 12 : fontSize === 'medium' ? 13 : fontSize === 'large' ? 15 : 17,
               wordWrap: "on",
               scrollBeyondLastLine: false,
               automaticLayout: true,
